@@ -36,6 +36,13 @@ if [[ $1 == "final" ]]; then
     export FINAL=true
 fi
 
+if $FINAL; then
+    STATUS="(FINAL)"
+    ADD="--final"
+else
+    STATUS="(PROFILING)"
+fi
+
 send_info() {
     curl -s -X POST https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage \
         -d chat_id="${CHAT_ID}" \
@@ -63,11 +70,7 @@ make install -j${NPROC} |& tee -a $WORKDIR/build.log
 cd $WORKDIR
 
 # Build LLVM
-send_info "CI : " "Building $VENDOR_STRING clang . . ."
-
-if ${FINAL}; then
-    ADD="--final"
-fi
+send_info "CI : " "Building $VENDOR_STRING clang $STATUS"
 
 $WORKDIR/build-llvm.py ${ADD} \
     --ref "$TAG" \
@@ -84,41 +87,42 @@ $WORKDIR/build-llvm.py ${ADD} \
     --vendor-string "$VENDOR_STRING" |& tee -a $WORKDIR/build.log
 
 # Check LLVM files
-if [[ -f "$INSTALL_FOLDER/bin/clang" ]]; then
+if [[ -f "$INSTALL_FOLDER/bin/clang" ]] || [[ -f "$WORKDIR/build/llvm/instrumented/profdata.prof" ]]; then
     send_info "CI : " "Compilation finished."
-    send_file "Build log" $WORKDIR/build.log
 else
     send_info "CI : " "Compilation failed."
     send_file "Build log" $WORKDIR/build.log
     exit 1
 fi
 
-# Strip binaries
-OBJCOPY=$INSTALL_FOLDER/bin/llvm-objcopy
-find "$INSTALL_FOLDER" -type f -exec file {} \; >.file-idx
-grep "not strip" .file-idx | tr ':' ' ' | awk '{print $1}' | while read -r file; do
-    $OBJCOPY --strip-all-gnu "$file"
-done
-rm -rf strip .file-idx
+if $FINAL; then
+    # Strip binaries
+    OBJCOPY=$INSTALL_FOLDER/bin/llvm-objcopy
+    find "$INSTALL_FOLDER" -type f -exec file {} \; >.file-idx
+    grep "not strip" .file-idx | tr ':' ' ' | awk '{print $1}' | while read -r file; do
+        $OBJCOPY --strip-all-gnu "$file"
+    done
+    rm -rf strip .file-idx
 
-# Release
-send_info "CI : " "Releasing into GitHub..."
-CLANG_VERSION="$($INSTALL_FOLDER/bin/clang --version | head -n1 | cut -d ' ' -f4)"
-MESSAGE="clang ${CLANG_VERSION}-${BUILD_DATE}"
-cd $INSTALL_FOLDER
-tar -I"$INSTALL_FOLDER/.zstd/bin/zstd --ultra -22 -T0" -cf clang.tar.zst *
-cd $WORKDIR
-git config --global user.name gacorprjkt-bot
-git config --global user.email gacorprjkt-bot@pornhub.com
-git clone https://ambatubash69:${GITHUB_TOKEN}@github.com/KLC-DEV/gacor-clang -b main $WORKDIR/clang-rel
-cd $WORKDIR/clang-rel
-cat dummy |
-    sed "s/LLVM_VERSION/${CLANG_VERSION}-${BUILD_DATE}/g" |
-    sed "s/SIZE_MB/$(du -m $INSTALL_FOLDER/clang.tar.zst | cut -f1)/g" |
-    sed "s/ZSTD_VERSION/${ZSTD_VERSION}/g" >README.md
-git commit --allow-empty -as -m "${MESSAGE}"
-git push origin main || exit 1
-mv $INSTALL_FOLDER/clang.tar.zst .
-hub release create -a clang.tar.zst -m "${MESSAGE}" ${BUILD_TAG}
-send_info "CI : " "Toolchain released."
-cd $WORKDIR
+    # Release
+    send_info "CI : " "Releasing into GitHub..."
+    CLANG_VERSION="$($INSTALL_FOLDER/bin/clang --version | head -n1 | cut -d ' ' -f4)"
+    MESSAGE="clang ${CLANG_VERSION}-${BUILD_DATE}"
+    cd $INSTALL_FOLDER
+    tar -I"$INSTALL_FOLDER/.zstd/bin/zstd --ultra -22 -T0" -cf clang.tar.zst *
+    cd $WORKDIR
+    git config --global user.name gacorprjkt-bot
+    git config --global user.email gacorprjkt-bot@pornhub.com
+    git clone https://ambatubash69:${GITHUB_TOKEN}@github.com/KLC-DEV/gacor-clang -b main $WORKDIR/clang-rel
+    cd $WORKDIR/clang-rel
+    cat dummy |
+        sed "s/LLVM_VERSION/${CLANG_VERSION}-${BUILD_DATE}/g" |
+        sed "s/SIZE_MB/$(du -m $INSTALL_FOLDER/clang.tar.zst | cut -f1)/g" |
+        sed "s/ZSTD_VERSION/${ZSTD_VERSION}/g" >README.md
+    git commit --allow-empty -as -m "${MESSAGE}"
+    git push origin main || exit 1
+    mv $INSTALL_FOLDER/clang.tar.zst .
+    hub release create -a clang.tar.zst -m "${MESSAGE}" ${BUILD_TAG}
+    send_info "CI : " "Toolchain released."
+    cd $WORKDIR
+fi
