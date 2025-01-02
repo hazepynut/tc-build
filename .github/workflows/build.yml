@@ -4,24 +4,29 @@ on:
 env:
   GITHUB_TOKEN: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
   TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
-  TZ: "Asia/Jakarta"
+  TZ: "Asia/Makassar"
 jobs:
   profiling-build:
     runs-on: ubuntu-latest
     container:
       image: diazaji/ubuntu:toolchain
     steps:
+      
       - name: Checkout code
         uses: actions/checkout@v4
+      
       - name: Restore & save ccache
         uses: hendrikmuhs/ccache-action@main
         with:
           key: ccache-llvm
-          max-size: 2G
+          max-size: 4G
+      
       - name: Build LLVM (profile)
-        run: ./ci.sh release
+        run: ./ci.sh
+      
       - name: Delete unnecessary files
         run: find build/llvm/instrumented -type f ! -name 'profdata.prof' -delete
+      
       - name: Cache LLVM artifacts
         uses: actions/cache/save@v4
         with:
@@ -29,19 +34,23 @@ jobs:
             build/llvm/instrumented
             src/llvm-project
           key: llvm-profiles-${{ github.run_id }}
+  
   final-build:
     runs-on: ubuntu-latest
     container:
       image: diazaji/ubuntu:toolchain
     needs: profiling-build
     steps:
+      
       - name: Checkout code
         uses: actions/checkout@v4
+      
       - name: Restore & save ccache
         uses: hendrikmuhs/ccache-action@main
         with:
           key: ccache-llvm
-          max-size: 2G
+          max-size: 4G
+      
       - name: Restore LLVM artifacts
         uses: actions/cache/restore@v4
         with:
@@ -49,5 +58,6 @@ jobs:
             build/llvm/instrumented
             src/llvm-project
           key: llvm-profiles-${{ github.run_id }}
+      
       - name: Build LLVM (final)
         run: ./ci.sh release final
