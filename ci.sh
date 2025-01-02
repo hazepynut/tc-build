@@ -113,7 +113,7 @@ git config --global user.name gacorprjkt-bot
 git config --global user.email gacorprjkt-bot@pornhub.com
 git clone https://ambatubash69:${GITHUB_TOKEN}@github.com/KLC-DEV/gacor-clang -b main $WORKDIR/clang-rel
 cd $WORKDIR/clang-rel
-cat README |
+cat dummy |
     sed "s/LLVM_VERSION/${CLANG_VERSION}-${BUILD_DATE}/g" |
     sed "s/SIZE_MB/$(du -m $INSTALL_FOLDER/clang.tar.zst | cut -f1)/g" |
     sed "s/ZSTD_VERSION/${ZSTD_VERSION}/g" >README.md
