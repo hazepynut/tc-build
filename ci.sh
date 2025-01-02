@@ -54,10 +54,9 @@ send_file() {
 }
 
 # Build ZSTD
-git clone https://github.com/facebook/zstd --depth=1 $WORKDIR/zstd
+ZSTD_VERSION=v1.5.6
+git clone --depth=1 https://github.com/facebook/zstd -b $ZSTD_VERSION $WORKDIR/zstd
 cd $WORKDIR/zstd
-ZSTD_VERSION=$(git describe --abbrev=0 --tags)
-git switch $ZSTD_VERSION
 cmake build/cmake -DCMAKE_INSTALL_PREFIX="$INSTALL_FOLDER/.zstd" |& tee -a $WORKDIR/build.log
 make -j${NPROC} |& tee -a $WORKDIR/build.log
 make install -j${NPROC} |& tee -a $WORKDIR/build.log
