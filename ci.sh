@@ -116,7 +116,7 @@ if $FINAL; then
     cd $WORKDIR
     git config --global user.name gacorprjkt-bot
     git config --global user.email gacorprjkt-bot@pornhub.com
-    git clone https://linastorvalds:${GITHUB_TOKEN}@github.com/linastorvalds/gacorprjkt-clang $WORKDIR/clang-rel
+    git clone https://Asteroidd21:${GITHUB_TOKEN}@github.com/Asteroidd21/gacorprjkt-clang $WORKDIR/clang-rel
     cd $WORKDIR/clang-rel
     cat dummy |
         sed "s/LLVM_VERSION/${CLANG_VERSION}-${BUILD_DATE}/g" |
