@@ -10,13 +10,7 @@ TAG=llvmorg-19.1.6
 INSTALL_FOLDER=$WORKDIR/install
 BUILD_DATE=$(date +%Y%m%d)
 BUILD_TAG=$(date +%Y%m%d-%H%M)
-NPROC=$(($(nproc --all) * 2))
-FLAGS="
-  LLVM_PARALLEL_COMPILE_JOBS=${NPROC}
-  LLVM_PARALLEL_LINK_JOBS=${NPROC}
-  CMAKE_C_FLAGS='-O3'
-  CMAKE_CXX_FLAGS='-O3'
-  "
+NPROC=$(nproc --all)
 
 if [[ $1 == "final" ]]; then
     FINAL=true
@@ -35,18 +29,17 @@ make install -j${NPROC}
 cd $WORKDIR
 
 # Build LLVM
-$WORKDIR/build-llvm.py ${ADD} \
-    --bolt \
-    --defines "$FLAGS" \
+$WORKDIR/build-llvm.py $ADD \
+    --build-type "Release" \
+    --build-stage1-only \
+    --defines "LLVM_PARALLEL_TABLEGEN_JOBS=${NPROC} LLVM_PARALLEL_COMPILE_JOBS=${NPROC} LLVM_PARALLEL_LINK_JOBS=${NPROC} LLVM_OPTIMIZED_TABLEGEN=ON CMAKE_C_FLAGS='-O3' CMAKE_CXX_FLAGS='-O3' CMAKE_EXE_LINKER_FLAGS='-O3' CMAKE_MODULE_LINKER_FLAGS='-O3' CMAKE_SHARED_LINKER_FLAGS='-O3' CMAKE_STATIC_LINKER_FLAGS='-O3'" \
     --install-folder "$INSTALL_FOLDER" \
     --lto thin \
-    --no-update \
     --pgo llvm \
     --projects clang lld polly \
-    --quiet-cmake \
-    --ref "$TAG" \
     --shallow-clone \
-    --targets AArch64 \
+    --targets AArch64 ARM X86 \
+    --no-update \
     --vendor-string "gacorprjkt"
 
 # Check LLVM files
@@ -60,7 +53,7 @@ fi
 if $FINAL; then
     # Build Binutils
     $WORKDIR/build-binutils.py \
-        --targets aarch64 arm \
+        --targets aarch64 arm x86_64 \
         --install-folder "$INSTALL_FOLDER"
 
     # Strip binaries
