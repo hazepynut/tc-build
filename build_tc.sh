@@ -46,7 +46,7 @@ $WORKDIR/build-llvm.py ${ADD} \
     --quiet-cmake \
     --ref "$TAG" \
     --shallow-clone \
-    --targets AArch64 \
+    --targets AArch64 X86 \
     --vendor-string "gacorprjkt"
 
 # Check LLVM files
@@ -60,7 +60,7 @@ fi
 if $FINAL; then
     # Build Binutils
     $WORKDIR/build-binutils.py \
-        --targets aarch64 arm \
+        --targets arm aarch64 \
         --install-folder "$INSTALL_FOLDER"
 
     # Strip binaries
