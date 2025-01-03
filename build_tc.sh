@@ -37,6 +37,8 @@ $WORKDIR/build-llvm.py $ADD \
     --lto thin \
     --pgo llvm \
     --projects clang lld polly \
+    --quiet-cmake \
+    --ref "$TAG" \
     --shallow-clone \
     --targets AArch64 ARM X86 \
     --no-update \
