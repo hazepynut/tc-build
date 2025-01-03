@@ -1,11 +1,10 @@
 env:
-  TELEGRAM_TOKEN: ENCRYPTED[b75bbe40b78b76b289624bb2785a38f207522ec0cdc8ad3f3d18168b5dde2e2f55f612caf489a6948d6d84dd5cda8bf1]
   GITHUB_TOKEN: ENCRYPTED[336394638805ffebe1a5cca203704fd0d856a989010d3a0ab49d6c7806065584666da652e3c4220607725dbc6d970770]
   TZ: "Asia/Makassar"
   CIRRUS_CLONE_DEPTH: 1
 
 container:
-  image: diazaji/debian:clang
+  image: mhmmdfdlyas/dockerfile:t-ubuntu
   cpu: 8
   memory: 32G
 
