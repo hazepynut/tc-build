@@ -1,6 +1,6 @@
 env:
-  TELEGRAM_TOKEN: ENCRYPTED[6b473ff76cc26b3c6087d63e21093aac91dacde424c51e03e73c5eaad15499ad286ecc3db1f65f4774807cb43223a6f1]
-  GITHUB_TOKEN: ENCRYPTED[5badd94e871240193b062498d849ab7720f993195a05b1cd428ad70a7690fa0b05a9d3da2a3086a2d2594ba78f79b821]
+  TELEGRAM_TOKEN:
+  GITHUB_TOKEN:
   TZ: "Asia/Makassar"
   CIRRUS_CLONE_DEPTH: 1
 
@@ -21,7 +21,7 @@ profile_task:
     fingerprint_key: $CIRRUS_BUILD_ID
 
 final_task:
-  depends_on: 
+  depends_on:
     - 'Build LLVM (profile)'
   name: Build LLVM (final)
   timeout_in: 120m
