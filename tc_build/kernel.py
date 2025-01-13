@@ -29,8 +29,7 @@ class KernelBuilder(Builder):
         self.make_variables = {
             'ARCH': arch,
             # We do not want warnings to cause build failures when profiling.
-            # Added more compilation flags to reflect real-world kernel compilation.
-            'KCFLAGS': '-Wno-error -O3 -mllvm -polly -mllvm -polly-position=early -mllvm -polly-vectorizer=stripmine -mllvm -polly-run-dce',
+            'KCFLAGS': '-Wno-error',
         }
         self.show_commands = True
         self.toolchain_prefix = None

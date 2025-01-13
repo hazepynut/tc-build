@@ -4,7 +4,7 @@ env:
   CIRRUS_CLONE_DEPTH: 1
 
 container:
-  image: diazaji/debian:clang
+  image: diazaji/ubuntu:toolchain
   cpu: 8
   memory: 32G
 
