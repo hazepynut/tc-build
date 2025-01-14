@@ -42,7 +42,6 @@ cd $WORKDIR
 
 # Build LLVM
 $WORKDIR/build-llvm.py $ADD \
-    --bolt \
     --build-type "Release" \
     --build-stage1-only \
     --defines "$CUSTOM_FLAGS" \
