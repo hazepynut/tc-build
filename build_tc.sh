@@ -6,7 +6,7 @@ if [[ -z $GITHUB_TOKEN ]]; then
 fi
 
 WORKDIR=$(pwd)
-LLVM_VERSION=19.1.6
+LLVM_VERSION=19.1.7
 ZSTD_VERSION=v1.5.6
 INSTALL_FOLDER=$WORKDIR/install
 BUILD_DATE=$(date +%Y%m%d)
