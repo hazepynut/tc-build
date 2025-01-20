@@ -12,18 +12,6 @@ INSTALL_FOLDER=$WORKDIR/install
 BUILD_DATE=$(date +%Y%m%d)
 BUILD_TAG=$(date +%Y%m%d-%H%M)
 NPROC=$(nproc --all)
-CUSTOM_FLAGS="
-  LLVM_PARALLEL_TABLEGEN_JOBS=${NPROC}
-  LLVM_PARALLEL_COMPILE_JOBS=${NPROC}
-  LLVM_PARALLEL_LINK_JOBS=${NPROC}
-  LLVM_OPTIMIZED_TABLEGEN=ON
-  CMAKE_C_FLAGS='-O3 -pipe -ffunction-sections -fdata-sections -fno-plt -fmerge-all-constants -fomit-frame-pointer -funroll-loops -falign-functions=64 -mllvm -polly -mllvm -polly-position=early -mllvm -polly-vectorizer=stripmine -mllvm -polly-run-dce'
-  CMAKE_CXX_FLAGS='-O3 -pipe -ffunction-sections -fdata-sections -fno-plt -fmerge-all-constants -fomit-frame-pointer -funroll-loops -falign-functions=64 -mllvm -polly -mllvm -polly-position=early -mllvm -polly-vectorizer=stripmine -mllvm -polly-run-dce'
-  CMAKE_EXE_LINKER_FLAGS='-Wl,-O3,--lto-O3,--lto-CGO3,--gc-sections,--strip-debug'
-  CMAKE_MODULE_LINKER_FLAGS='-Wl,-O3,--lto-O3,--lto-CGO3,--gc-sections,--strip-debug'
-  CMAKE_SHARED_LINKER_FLAGS='-Wl,-O3,--lto-O3,--lto-CGO3,--gc-sections,--strip-debug'
-  CMAKE_STATIC_LINKER_FLAGS='-Wl,-O3,--lto-O3,--lto-CGO3,--gc-sections,--strip-debug'
-  "
 
 if [[ $1 == "final" ]]; then
     FINAL=true
@@ -40,20 +28,21 @@ make -j${NPROC}
 make install -j${NPROC}
 cd $WORKDIR
 
-# Build LLVM
 $WORKDIR/build-llvm.py $ADD \
-    --build-type "Release" \
+    --bolt \
+    --defines LLVM_PARALLEL_COMPILE_JOBS="$NPROC" LLVM_PARALLEL_LINK_JOBS="$NPROC" CMAKE_C_FLAGS="-O3" CMAKE_CXX_FLAGS="-O3" \
     --build-stage1-only \
-    --defines "$CUSTOM_FLAGS" \
+    --build-target distribution \
     --install-folder "$INSTALL_FOLDER" \
+    --install-target distribution \
+    --projects clang lld polly \
+    --ref "llvmorg-$LLVM_VERSION" \
+    --no-update \
+    --shallow-clone \
     --lto thin \
     --pgo llvm \
-    --projects clang lld polly \
     --quiet-cmake \
-    --ref "llvmorg-$LLVM_VERSION" \
-    --shallow-clone \
-    --targets AArch64 ARM X86 \
-    --no-update \
+    --targets ARM AArch64 X86 \
     --vendor-string "QuartiX"
 
 # Check LLVM files
