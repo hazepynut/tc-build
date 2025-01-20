@@ -14,7 +14,7 @@ from tc_build.kernel import KernelBuilder, LinuxSourceManager, LLVMKernelBuilder
 from tc_build.tools import HostTools, StageTools
 
 # This is a known good revision of LLVM for building the kernel
-GOOD_REVISION = '2ab9233f4f393c240c37ef092de09d907fe5c890'
+GOOD_REVISION = '6657d4bd70523e6852f07f64711fb15bdf7b347a'
 
 # The version of the Linux kernel that the script downloads if necessary
 DEFAULT_KERNEL_FOR_PGO = (6, 12, 0)
@@ -451,14 +451,11 @@ if args.bolt or (args.pgo and [x for x in args.pgo if 'kernel' in x]):
                 f"Supplied kernel source version ('{found_version}') is older than the minimum required version ('{minimum_version}'), provide a newer version!"
             )
     else:
-        # Turns (6, 2, 0) into 6.2 and (6, 2, 1) into 6.2.1 to follow tarball names
-        ver_str = '.'.join(str(x) for x in DEFAULT_KERNEL_FOR_PGO if x)
-        lsm.location = Path(src_folder, f"linux-{ver_str}")
+        lsm.location = Path(src_folder, 'linux-6.13')
         lsm.patches = list(src_folder.glob('*.patch'))
 
-        lsm.tarball.base_download_url = 'https://cdn.kernel.org/pub/linux/kernel/v6.x'
-        lsm.tarball.local_location = lsm.location.with_name(f"{lsm.location.name}.tar.xz")
-        lsm.tarball.remote_checksum_name = 'sha256sums.asc'
+        lsm.tarball.base_download_url = 'https://git.kernel.org/torvalds/t'
+        lsm.tarball.local_location = lsm.location.with_name(f"{lsm.location.name}.tar.gz")
 
         tc_build.utils.print_header('Preparing Linux source for profiling runs')
         lsm.prepare()
