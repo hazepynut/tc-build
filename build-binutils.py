@@ -136,7 +136,7 @@ for item in targets:
                 builder.cflags.append('-mtune=native')
 
         if args.vendor_string:
-            builder.configure_flags.append(f"--with-pkgversion={args.vendor_string} Binutils"
+            builder.configure_flags.append(f"--with-pkgversion={args.vendor_string} Binutils")
 
         builder.show_commands = args.show_build_commands
         builder.build()
