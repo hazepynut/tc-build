@@ -20,14 +20,6 @@ else
     FINAL=false
 fi
 
-# Build ZSTD
-git clone --depth=1 https://github.com/facebook/zstd -b $ZSTD_VERSION $WORKDIR/zstd
-cd $WORKDIR/zstd
-cmake build/cmake -DCMAKE_INSTALL_PREFIX="$INSTALL_FOLDER/.zstd"
-make -j${NPROC}
-make install -j${NPROC}
-cd $WORKDIR
-
 $WORKDIR/build-llvm.py $ADD \
     --bolt \
     --defines LLVM_PARALLEL_COMPILE_JOBS="$NPROC" LLVM_PARALLEL_LINK_JOBS="$NPROC" CMAKE_C_FLAGS="-O3" CMAKE_CXX_FLAGS="-O3" \
@@ -54,10 +46,19 @@ else
 fi
 
 if $FINAL; then
+    # Build ZSTD
+    git clone --depth=1 https://github.com/facebook/zstd -b $ZSTD_VERSION $WORKDIR/zstd
+    cd $WORKDIR/zstd
+    cmake build/cmake -DCMAKE_INSTALL_PREFIX="$INSTALL_FOLDER/.zstd"
+    make -j${NPROC}
+    make install -j${NPROC}
+    cd $WORKDIR
+
     # Build Binutils
     $WORKDIR/build-binutils.py \
         --targets aarch64 arm x86_64 \
-        --install-folder "$INSTALL_FOLDER"
+        --install-folder "$INSTALL_FOLDER" \
+        --vendor-string "QuartiX"
 
     # Strip binaries
     OBJCOPY=$INSTALL_FOLDER/bin/llvm-objcopy

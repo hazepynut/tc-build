@@ -16,17 +16,24 @@ class BinutilsBuilder(Builder):
 
         self.cflags = ['-O3']
         self.configure_flags = [
-            '--disable-compressed-debug-sections',
+            '--disable-docs',
             '--disable-gdb',
-            '--disable-nls',
-            '--disable-werror',
+            '--disable-gdbserver',
+            '--disable-libdecnumber',
+            '--disable-readline',
+            '--disable-sim',
             '--enable-deterministic-archives',
+            '--enable-gold',
+            '--enable-ld=default',
+            '--enable-lto',
             '--enable-new-dtags',
             '--enable-plugins',
             '--enable-threads',
             '--quiet',
-            '--with-system-zlib',
+            '--disable-werror',
+            '--disable-compressed-debug-sections',
         ]
+
         # gprofng uses glibc APIs that might not be available on musl
         if tc_build.utils.libc_is_musl():
             self.configure_flags.append('--disable-gprofng')
@@ -54,7 +61,7 @@ class BinutilsBuilder(Builder):
 
         self.clean_build_folder()
         self.folders.build.mkdir(exist_ok=True, parents=True)
-        tc_build.utils.print_header(f"Building {self.target} binutils")
+        tc_build.utils.print_header(f"Building {self.target} Binutils")
 
         configure_cmd = [
             Path(self.folders.source, 'configure'),
@@ -76,8 +83,6 @@ class StandardBinutilsBuilder(BinutilsBuilder):
         super().__init__()
 
         self.configure_flags += [
-            '--disable-sim',
-            '--enable-lto',
             '--enable-relro',
             '--with-pic',
         ]
@@ -90,6 +95,7 @@ class NoMultilibBinutilsBuilder(BinutilsBuilder):
 
         self.configure_flags += [
             '--disable-multilib',
+	    '--disable-nls',
             '--with-gnu-as',
             '--with-gnu-ld',
         ]

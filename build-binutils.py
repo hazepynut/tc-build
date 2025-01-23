@@ -65,6 +65,12 @@ parser.add_argument('-t',
                     or just the first part (arm, aarch64, x86_64, etc).
                     ''',
                     nargs='+')
+parser.add_argument('--vendor-string',
+                    help='''
+                    Add this into Binutils version.
+                    ''',
+                    type=str)
+
 args = parser.parse_args()
 
 script_start = time.time()
@@ -128,6 +134,10 @@ for item in targets:
             # optimize the toolchain for their machine.
             if 'x86-64-v' in args.march:
                 builder.cflags.append('-mtune=native')
+
+        if args.vendor_string:
+            builder.configure_flags.append(f"--with-pkgversion={args.vendor_string} Binutils"
+
         builder.show_commands = args.show_build_commands
         builder.build()
     else:
