@@ -84,7 +84,7 @@ if $FINAL; then
     # Set README
     git config --global user.name QuartiX-bot
     git config --global user.email quartix-bot@gacorprjkt
-    git clone --depth=1 https://Asteroidd21:${GITHUB_TOKEN}@github.com/Asteroidd21/quartix-clang $WORKDIR/clang-rel
+    git clone --depth=1 https://hazepynut:${GITHUB_TOKEN}@github.com/hazepynut/quartix-clang $WORKDIR/clang-rel
     cd $WORKDIR/clang-rel
     cat dummy |
         sed "s/LLVM_VERSION/${CLANG_VERSION} (${BUILD_DATE})/g" |
