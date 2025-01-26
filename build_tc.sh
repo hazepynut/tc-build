@@ -33,7 +33,7 @@ $WORKDIR/build-llvm.py $ADD \
     --lto thin \
     --pgo llvm \
     --quiet-cmake \
-    --targets ARM AArch64 \
+    --targets ARM AArch64 X86 \
     --vendor-string "QuartiX"
 
 # Check LLVM files
@@ -55,7 +55,7 @@ if $FINAL; then
 
     # Build Binutils
     $WORKDIR/build-binutils.py \
-        --targets aarch64 arm \
+        --targets aarch64 arm x86_64 \
         --install-folder "$INSTALL_FOLDER" \
         --vendor-string "QuartiX"
 
