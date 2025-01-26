@@ -28,13 +28,12 @@ $WORKDIR/build-llvm.py $ADD \
     --install-folder "$INSTALL_FOLDER" \
     --install-target distribution \
     --projects clang lld polly \
-    --ref "llvmorg-$LLVM_VERSION" \
+    --use-good-revision \
     --no-update \
-    --shallow-clone \
     --lto thin \
     --pgo llvm \
     --quiet-cmake \
-    --targets ARM AArch64 X86 \
+    --targets ARM AArch64 \
     --vendor-string "QuartiX"
 
 # Check LLVM files
@@ -56,7 +55,7 @@ if $FINAL; then
 
     # Build Binutils
     $WORKDIR/build-binutils.py \
-        --targets aarch64 arm x86_64 \
+        --targets aarch64 arm \
         --install-folder "$INSTALL_FOLDER" \
         --vendor-string "QuartiX"
 
