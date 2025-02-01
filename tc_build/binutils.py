@@ -3,6 +3,7 @@
 import os
 from pathlib import Path
 import platform
+from tempfile import TemporaryDirectory
 
 from tc_build.builder import Builder
 from tc_build.source import SourceManager
@@ -61,18 +62,24 @@ class BinutilsBuilder(Builder):
         self.folders.build.mkdir(exist_ok=True, parents=True)
         tc_build.utils.print_header(f"Building {self.target} Binutils")
 
-        configure_cmd = [
-            Path(self.folders.source, 'configure'),
-            *self.configure_flags,
-        ] + [f"{var}={val}" for var, val in self.configure_vars.items()]
-        self.run_cmd(configure_cmd, cwd=self.folders.build)
+        # Binutils does not provide a configuration flag to disable installation of documentation directly.
+        # Instead, we redirect generated docs to a temporary directory, deleting them after installation.
+        with TemporaryDirectory() as tmpdir:
+            doc_dirs = ('info', 'html', 'pdf', 'man')
+            self.configure_flags += [f"--{doc}dir={tmpdir}" for doc in doc_dirs]
 
-        make_cmd = ['make', '-C', self.folders.build, '-s', f"-j{os.cpu_count()}", 'V=0']
-        self.run_cmd(make_cmd)
+            configure_cmd = [
+                Path(self.folders.source, 'configure'),
+                *self.configure_flags,
+            ] + [f"{var}={val}" for var, val in self.configure_vars.items()]
+            self.run_cmd(configure_cmd, cwd=self.folders.build)
 
-        if self.folders.install:
-            self.run_cmd([*make_cmd, 'install'])
-            tc_build.utils.create_gitignore(self.folders.install)
+            make_cmd = ['make', '-C', self.folders.build, '-s', f"-j{os.cpu_count()}", 'V=0']
+            self.run_cmd(make_cmd)
+
+            if self.folders.install:
+                self.run_cmd([*make_cmd, 'install'])
+                tc_build.utils.create_gitignore(self.folders.install)
 
 
 class StandardBinutilsBuilder(BinutilsBuilder):
